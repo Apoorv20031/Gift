@@ -111,8 +111,8 @@
 
   <section id="screen-box" class="screen">
     <h1 class="title">A Magic Gift For...</h1>
-    <input id="nameInput" value=" Anandi " maxlength="18">
-    <p class="sub">RURU made you a special mystery box. Tap it to see what's inside!</p>
+    <input id="nameInput" value=" Sai " maxlength="18">
+    <p class="sub">Ruru made you a special mystery box. Tap it to see what's inside!</p>
     <div id="box-wrap">
       <div class="glow-ring"></div>
       <svg viewBox="0 0 200 200" width="100%" height="100%">
@@ -289,6 +289,14 @@ document.addEventListener('mousemove',(e)=>{
   const now=Date.now(); if (now-lastSparkle<90) return; lastSparkle=now;
   spawnSparkle(e.clientX,e.clientY);
 });
+function handleTouchSparkle(e){
+  if (screens.hub.classList.contains('hidden')) return;
+  const now=Date.now(); if (now-lastSparkle<90) return; lastSparkle=now;
+  const t = e.touches && e.touches[0];
+  if (t) spawnSparkle(t.clientX, t.clientY);
+}
+document.addEventListener('touchstart', handleTouchSparkle, {passive:true});
+document.addEventListener('touchmove', handleTouchSparkle, {passive:true});
 
 function confettiBurst(cx,cy,count=26){
   const colors=['#FF6FA5','#7FD8F7','#FFD65C','#B4F5C6','#C6519E'];
