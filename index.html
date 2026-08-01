@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Magic Unicorn Surprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lavender:#EFE1FB; --sky:#D6EEFB; --pink:#FFD9EC; --sun:#FFF4C2;
+    --magenta:#C6519E; --ink:#4A3B6B; --gold:#F2B705; --mint:#BDF0DE; --white:#ffffff;
+    --shadow: 0 10px 30px rgba(120, 80, 160, 0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;font-family:'Nunito',sans-serif;color:var(--ink);overflow:hidden;}
+  body{
+    background: linear-gradient(160deg, var(--lavender) 0%, var(--sky) 45%, var(--pink) 100%);
+    background-size:200% 200%; animation: bgShift 18s ease-in-out infinite;
+    position:relative; width:100vw; height:100vh;
+  }
+  @keyframes bgShift{0%{background-position:0% 0%;}50%{background-position:100% 100%;}100%{background-position:0% 0%;}}
+  .cloud{position:absolute;opacity:0.85;pointer-events:none;animation:drift linear infinite;}
+  @keyframes drift{from{transform:translateX(-120px);}to{transform:translateX(120vw);}}
+  .cloud svg{width:100%;height:100%;}
+  #stars-header{
+    position:absolute;top:14px;right:18px;z-index:50;background:var(--white);
+    padding:8px 16px;border-radius:999px;box-shadow:var(--shadow);
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;color:var(--magenta);
+    display:flex;align-items:center;gap:6px;
+  }
+  #app{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+  .screen{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:absolute;inset:0;padding:16px;text-align:center;overflow-y:auto;}
+  .hidden{display:none;}
+  h1.title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(24px,5vw,40px);color:var(--magenta);margin:0 0 6px 0;text-shadow:2px 2px 0 var(--white);}
+  p.sub{font-size:clamp(14px,2.2vw,18px);font-weight:600;margin:0 0 16px 0;max-width:520px;}
+  #nameInput{font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:700;text-align:center;padding:8px 16px;border-radius:14px;border:3px solid var(--magenta);color:var(--magenta);outline:none;margin-bottom:18px;background:var(--white);width:min(280px,70vw);}
+
+  #box-wrap{width:220px;height:220px;cursor:pointer;position:relative;transition:transform .15s;}
+  #box-wrap:hover{transform:scale(1.05);}
+  #box-wrap.shaking{animation:shake .5s ease-in-out infinite;}
+  @keyframes shake{0%,100%{transform:rotate(0) scale(1.05);}25%{transform:rotate(-6deg) scale(1.08);}75%{transform:rotate(6deg) scale(1.08);}}
+  #box-wrap.gone{animation:boxPop .35s forwards;}
+  @keyframes boxPop{to{transform:scale(0);opacity:0;}}
+  .glow-ring{position:absolute;inset:-30px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,194,.9),rgba(255,244,194,0) 70%);animation:pulse 1.6s ease-in-out infinite;pointer-events:none;}
+  @keyframes pulse{0%,100%{opacity:.5;transform:scale(.9);}50%{opacity:1;transform:scale(1.15);}}
+  .tap-hint{margin-top:18px;font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--magenta);font-size:16px;animation:bob 1.4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+  .unicorn-photo{max-width:230px;width:70vw;filter:drop-shadow(0 14px 20px rgba(120,80,160,.3));}
+  .unicorn-photo.reveal{animation:popIn .7s cubic-bezier(.34,1.56,.64,1) forwards;transform:scale(0);}
+  @keyframes popIn{0%{transform:scale(0) rotate(-15deg);}70%{transform:scale(1.15) rotate(6deg);}100%{transform:scale(1) rotate(0);}}
+  .unicorn-photo.idle{animation:floaty 3s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-12px) rotate(1deg);}}
+  .unicorn-photo.happy{animation:bounceHappy .6s ease;}
+  @keyframes bounceHappy{0%{transform:scale(1);}30%{transform:scale(1.15,.88) translateY(8px);}55%{transform:scale(.92,1.12) translateY(-16px);}75%{transform:scale(1.06,.96) translateY(4px);}100%{transform:scale(1);}}
+
+  .hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;max-width:560px;width:100%;}
+  .game-card{background:var(--white);border-radius:20px;padding:14px 6px;box-shadow:var(--shadow);cursor:pointer;border:3px solid transparent;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:var(--ink);transition:transform .15s,border-color .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .game-card:hover{transform:translateY(-4px) scale(1.03);border-color:var(--gold);}
+  .game-card .emoji{font-size:30px;}
+
+  .game-panel{background:var(--white);border-radius:26px;padding:24px 20px;box-shadow:var(--shadow);max-width:560px;width:94%;position:relative;}
+  .back-btn{position:absolute;top:12px;left:12px;background:var(--lavender);border:none;border-radius:999px;padding:6px 14px;font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--magenta);cursor:pointer;font-size:14px;z-index:5;}
+  .game-title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--magenta);margin:4px 0 14px 0;}
+  .prompt-area{font-size:19px;font-weight:800;margin-bottom:16px;min-height:46px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;}
+  .options-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  .opt-btn{font-family:'Baloo 2',sans-serif;font-size:19px;font-weight:700;padding:14px 8px;border-radius:16px;border:3px solid var(--sky);background:var(--sky);color:var(--ink);cursor:pointer;transition:transform .12s,background .15s;}
+  .opt-btn:hover{transform:scale(1.04);}
+  .opt-btn.correct{background:var(--mint);border-color:#4CBE8B;animation:bounceHappy .6s ease;}
+  .opt-btn.wrong{background:#FFD3D3;border-color:#E88;animation:shakeWrong .4s;}
+  @keyframes shakeWrong{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+  .feedback{margin-top:12px;font-weight:800;font-size:15px;min-height:20px;color:var(--magenta);}
+  .count-objects{font-size:28px;letter-spacing:3px;margin-bottom:10px;}
+
+  .sparkle{position:fixed;pointer-events:none;z-index:999;font-size:18px;animation:sparkleFade .8s ease-out forwards;}
+  @keyframes sparkleFade{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-30px) scale(.4);}}
+  .confetti{position:fixed;width:10px;height:10px;z-index:998;pointer-events:none;border-radius:2px;}
+
+  /* Pet screen */
+  .pet-stage{position:relative;width:220px;height:220px;margin:6px auto 10px;}
+  .accessory{position:absolute;font-size:40px;top:-14px;left:50%;transform:translateX(-50%);}
+  .meter-wrap{width:100%;max-width:320px;margin:8px auto;}
+  .meter-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px;color:var(--magenta);}
+  .meter-bar{height:20px;background:var(--lavender);border-radius:999px;overflow:hidden;border:2px solid var(--white);box-shadow:inset 0 2px 4px rgba(0,0,0,.08);}
+  .meter-fill{height:100%;background:linear-gradient(90deg,#FF6FA5,#FFD65C,#7FD8F7);width:40%;transition:width .5s ease;}
+  .pet-actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+  .pet-btn{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;padding:12px 16px;border-radius:16px;border:3px solid var(--pink);background:var(--white);color:var(--ink);cursor:pointer;transition:transform .12s;}
+  .pet-btn:hover{transform:translateY(-3px) scale(1.04);}
+  .float-emoji{position:absolute;font-size:26px;pointer-events:none;animation:floatUp 1s ease-out forwards;}
+  @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-60px) scale(1.3);}}
+
+  /* Fly game */
+  #flyCanvas{background:linear-gradient(180deg,#BFE8FB 0%,#EAF7FF 70%,#CDEFD8 100%);border-radius:20px;display:block;margin:0 auto;touch-action:none;max-width:100%;box-shadow:var(--shadow);}
+  .fly-wrap{width:100%;max-width:420px;margin:0 auto;}
+  .fly-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.95);border:3px solid var(--pink);border-radius:20px;text-align:center;padding:30px 20px;min-height:280px;box-sizing:border-box;}
+  .fly-overlay h3{font-family:'Baloo 2',sans-serif;color:var(--magenta);margin:0 0 8px 0;font-size:20px;}
+  .fly-overlay p{margin:0 0 14px 0;font-weight:700;font-size:14px;max-width:280px;}
+  .fly-btn{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;padding:12px 26px;border-radius:16px;border:none;background:var(--magenta);color:white;cursor:pointer;box-shadow:0 6px 0 #9A3B79;}
+  .fly-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #9A3B79;}
+  .fly-score{font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--magenta);font-size:16px;margin-top:8px;}
+
+  footer.credit{position:absolute;bottom:6px;width:100%;text-align:center;font-size:11px;color:var(--ink);opacity:.5;font-weight:700;}
+</style>
+</head>
+<body>
+
+<div id="stars-header">⭐ <span id="starCount">0</span></div>
+
+<div id="app">
+
+  <section id="screen-box" class="screen">
+    <h1 class="title">A Magic Gift For...</h1>
+    <input id="nameInput" value=" Anandi " maxlength="18">
+    <p class="sub">RURU made you a special mystery box. Tap it to see what's inside!</p>
+    <div id="box-wrap">
+      <div class="glow-ring"></div>
+      <svg viewBox="0 0 200 200" width="100%" height="100%">
+        <rect x="30" y="80" width="140" height="100" rx="10" fill="url(#boxGrad)"/>
+        <rect x="20" y="70" width="160" height="26" rx="8" fill="#F2B705"/>
+        <rect x="90" y="70" width="20" height="110" fill="#F2B705"/>
+        <path d="M100 70 C 70 30, 30 40, 60 65 C 75 75, 95 72, 100 70 Z" fill="#F2B705"/>
+        <path d="M100 70 C 130 30, 170 40, 140 65 C 125 75, 105 72, 100 70 Z" fill="#F2B705"/>
+        <defs><linearGradient id="boxGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#D976B4"/><stop offset="100%" stop-color="#B04C8C"/>
+        </linearGradient></defs>
+      </svg>
+    </div>
+    <div class="tap-hint">Tap the box!</div>
+  </section>
+
+  <section id="screen-reveal" class="screen hidden">
+    <h1 class="title" id="revealTitle">Surprise!</h1>
+    <img id="unicornReveal" class="unicorn-photo reveal" src="" alt="A cute magic unicorn">
+    <p class="sub">Your very own magic unicorn! Say hello 👋</p>
+    <div class="tap-hint">Tap the unicorn to continue</div>
+  </section>
+
+  <section id="screen-hub" class="screen hidden">
+    <h1 class="title" id="hubTitle">Play &amp; Learn!</h1>
+    <img id="unicornHub" class="unicorn-photo idle" src="" alt="Your unicorn" style="width:110px;cursor:pointer;">
+    <div class="hub-grid">
+      <div class="game-card" data-target="pet"><span class="emoji">🐾</span>My Unicorn</div>
+      <div class="game-card" data-target="fly"><span class="emoji">🌈</span>Fly to the Sky</div>
+      <div class="game-card" data-game="counting"><span class="emoji">🍓</span>Counting Meadow</div>
+      <div class="game-card" data-game="letters"><span class="emoji">🔤</span>Rainbow Letters</div>
+      <div class="game-card" data-game="colors"><span class="emoji">🎨</span>Color Magic</div>
+      <div class="game-card" data-game="math"><span class="emoji">➕</span>Math Sparkle</div>
+    </div>
+  </section>
+
+  <section id="screen-pet" class="screen hidden">
+    <div class="game-panel">
+      <button class="back-btn" id="backBtnPet">← Back</button>
+      <div class="game-title">My Pet Unicorn</div>
+      <div class="pet-stage" id="petStage">
+        <img id="unicornPet" class="unicorn-photo idle" src="" style="width:100%;" alt="Your pet unicorn">
+        <div class="accessory" id="accessorySlot"></div>
+      </div>
+      <div class="meter-wrap">
+        <div class="meter-label">Happiness</div>
+        <div class="meter-bar"><div class="meter-fill" id="happyFill"></div></div>
+      </div>
+      <div class="pet-actions">
+        <button class="pet-btn" id="feedBtn">🍓 Feed</button>
+        <button class="pet-btn" id="petBtn">💖 Pet</button>
+        <button class="pet-btn" id="playBtn">🎵 Play</button>
+      </div>
+      <div class="feedback" id="petFeedback"></div>
+    </div>
+  </section>
+
+  <section id="screen-fly" class="screen hidden">
+    <div class="game-panel" style="max-width:520px;">
+      <button class="back-btn" id="backBtnFly">← Back</button>
+      <div class="game-title">Fly to the Sky</div>
+      <div class="fly-wrap">
+        <div class="fly-overlay" id="flyOverlay">
+          <h3>Ready to fly?</h3>
+          <p>Tap, click, or press Space to flap. Fly through the gaps in the rainbow clouds!</p>
+          <button class="fly-btn" id="flyStartBtn">Start Flying</button>
+        </div>
+        <canvas id="flyCanvas" width="400" height="340" style="display:none;"></canvas>
+      </div>
+      <div class="fly-score" id="flyScoreLabel">Score: 0</div>
+    </div>
+  </section>
+
+  <section id="screen-game" class="screen hidden">
+    <div class="game-panel">
+      <button class="back-btn" id="backBtn">← Back</button>
+      <div class="game-title" id="gameTitle"></div>
+      <div class="prompt-area" id="promptArea"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="credit">Made with 💜 just for you</footer>
+
+<script>
+let GIFT_NAME = "Little Star";
+/* Free-to-use unicorn illustration (Pixabay Content License — no attribution required) */
+const UNICORN_IMG = "https://cdn.pixabay.com/photo/2023/08/24/11/32/cartoon-8210497_640.png";
+
+/* Guaranteed-to-work backup unicorn (drawn inline, works with zero internet access)
+   in case the image above is blocked by a network/firewall/ad-blocker. */
+const UNICORN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+<g opacity="0.9"><path d="M40 150 Q 20 130 35 110" stroke="#FF6FA5" stroke-width="8" fill="none" stroke-linecap="round"/>
+<path d="M48 158 Q 25 145 40 122" stroke="#FFC93C" stroke-width="7" fill="none" stroke-linecap="round"/>
+<path d="M56 165 Q 32 158 48 135" stroke="#5AD8A6" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<rect x="80" y="150" width="12" height="35" rx="6" fill="#FBEFFF"/><rect x="130" y="150" width="12" height="35" rx="6" fill="#FBEFFF"/>
+<rect x="95" y="155" width="10" height="30" rx="5" fill="#F3DFFB"/><rect x="118" y="155" width="10" height="30" rx="5" fill="#F3DFFB"/>
+<ellipse cx="110" cy="140" rx="55" ry="35" fill="#FFFFFF" stroke="#E4CFF0" stroke-width="2"/>
+<path d="M158 130 Q 190 120 185 150 Q 205 145 195 170" stroke="#FF6FA5" stroke-width="9" fill="none" stroke-linecap="round"/>
+<path d="M160 140 Q 188 140 182 165" stroke="#7FD8F7" stroke-width="7" fill="none" stroke-linecap="round"/>
+<path d="M158 150 Q 180 158 170 180" stroke="#FFD65C" stroke-width="6" fill="none" stroke-linecap="round"/>
+<g transform="translate(60,60)">
+<ellipse cx="55" cy="55" rx="42" ry="38" fill="#FFFFFF" stroke="#E4CFF0" stroke-width="2"/>
+<ellipse cx="25" cy="70" rx="16" ry="12" fill="#FFF9FD"/><circle cx="18" cy="70" r="2" fill="#B98FC9"/><circle cx="28" cy="74" r="2" fill="#B98FC9"/>
+<polygon points="55,4 62,28 48,28" fill="#F2B705" stroke="#D99A00" stroke-width="1.5"/><polygon points="55,4 58,14 52,14" fill="#FFE28A"/>
+<polygon points="30,20 22,2 40,14" fill="#FFFFFF" stroke="#E4CFF0" stroke-width="2"/><polygon points="80,20 88,2 70,14" fill="#FFFFFF" stroke="#E4CFF0" stroke-width="2"/>
+<polygon points="31,17 27,6 37,13" fill="#FFC7E5"/><polygon points="79,17 83,6 73,13" fill="#FFC7E5"/>
+<path d="M85 25 Q 105 35 90 55 Q 112 60 95 78 Q 115 85 98 100" stroke="#FF6FA5" stroke-width="10" fill="none" stroke-linecap="round"/>
+<path d="M80 20 Q 100 28 86 48" stroke="#7FD8F7" stroke-width="8" fill="none" stroke-linecap="round"/>
+<path d="M88 32 Q 108 44 92 62" stroke="#FFD65C" stroke-width="7" fill="none" stroke-linecap="round"/>
+<circle cx="40" cy="55" r="7" fill="#4A3B6B"/><circle cx="42.5" cy="52.5" r="2" fill="#fff"/>
+<path d="M33 48 L 28 44" stroke="#4A3B6B" stroke-width="2" stroke-linecap="round"/>
+<ellipse cx="22" cy="60" rx="7" ry="4" fill="#FFC7E5" opacity="0.8"/>
+<path d="M28 78 Q 34 83 40 78" stroke="#B98FC9" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg>`;
+const UNICORN_FALLBACK = "data:image/svg+xml," + encodeURIComponent(UNICORN_SVG);
+
+function useFallback(img){ img.onerror = null; img.src = UNICORN_FALLBACK; }
+
+[document.getElementById('unicornReveal'), document.getElementById('unicornHub'), document.getElementById('unicornPet')].forEach(img => {
+  img.onerror = () => useFallback(img);
+  img.src = UNICORN_IMG;
+});
+
+const screens = {
+  box: document.getElementById('screen-box'),
+  reveal: document.getElementById('screen-reveal'),
+  hub: document.getElementById('screen-hub'),
+  pet: document.getElementById('screen-pet'),
+  fly: document.getElementById('screen-fly'),
+  game: document.getElementById('screen-game'),
+};
+function showScreen(name){
+  Object.values(screens).forEach(s => s.classList.add('hidden'));
+  screens[name].classList.remove('hidden');
+  if (name !== 'fly') stopFlyGame();
+}
+
+let stars = 0;
+function addStar(n){ stars += (n||1); document.getElementById('starCount').textContent = stars; }
+
+let audioCtx;
+function playTone(freqs, dur=0.15){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f,i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type='sine'; o.frequency.value=f; g.gain.value=0.08;
+      o.connect(g); g.connect(audioCtx.destination);
+      const start = audioCtx.currentTime + i*0.08;
+      o.start(start);
+      g.gain.exponentialRampToValueAtTime(0.0001, start+dur);
+      o.stop(start+dur+0.02);
+    });
+  }catch(e){}
+}
+const chime = () => playTone([523.25,659.25,783.99],0.25);
+const buzz = () => playTone([220,180],0.2);
+const pop = () => playTone([440,660],0.12);
+
+const sparkleEmojis = ['✨','⭐','💖','🌟'];
+function spawnSparkle(x,y){
+  const el = document.createElement('div');
+  el.className='sparkle'; el.textContent = sparkleEmojis[Math.floor(Math.random()*sparkleEmojis.length)];
+  el.style.left=x+'px'; el.style.top=y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),800);
+}
+let lastSparkle=0;
+document.addEventListener('mousemove',(e)=>{
+  if (screens.hub.classList.contains('hidden')) return;
+  const now=Date.now(); if (now-lastSparkle<90) return; lastSparkle=now;
+  spawnSparkle(e.clientX,e.clientY);
+});
+
+function confettiBurst(cx,cy,count=26){
+  const colors=['#FF6FA5','#7FD8F7','#FFD65C','#B4F5C6','#C6519E'];
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div'); el.className='confetti';
+    el.style.left=cx+'px'; el.style.top=cy+'px';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    document.body.appendChild(el);
+    const angle=Math.random()*Math.PI*2, dist=60+Math.random()*120;
+    const dx=Math.cos(angle)*dist, dy=Math.sin(angle)*dist-40;
+    el.animate([
+      {transform:'translate(0,0) rotate(0deg)',opacity:1},
+      {transform:`translate(${dx}px, ${dy+160}px) rotate(${360*Math.random()}deg)`,opacity:0}
+    ],{duration:900+Math.random()*400,easing:'ease-out'});
+    setTimeout(()=>el.remove(),1400);
+  }
+}
+
+function makeClouds(){
+  for(let i=0;i<5;i++){
+    const c=document.createElement('div'); c.className='cloud';
+    const size=60+Math.random()*70;
+    c.style.width=size+'px'; c.style.height=(size*0.55)+'px';
+    c.style.top=(5+Math.random()*55)+'%';
+    c.style.animationDuration=(30+Math.random()*30)+'s';
+    c.style.animationDelay=(-Math.random()*30)+'s';
+    c.innerHTML = `<svg viewBox="0 0 100 55" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="35" rx="28" ry="18" fill="#ffffff"/>
+      <ellipse cx="60" cy="28" rx="24" ry="20" fill="#ffffff"/>
+      <ellipse cx="80" cy="38" rx="20" ry="14" fill="#ffffff"/></svg>`;
+    document.body.appendChild(c);
+  }
+}
+makeClouds();
+
+/* Box opening */
+const boxWrap = document.getElementById('box-wrap');
+let boxOpened = false;
+boxWrap.addEventListener('click', () => {
+  if (boxOpened) return;
+  boxOpened = true;
+  GIFT_NAME = document.getElementById('nameInput').value.trim() || GIFT_NAME;
+  boxWrap.classList.add('shaking'); chime();
+  setTimeout(() => {
+    boxWrap.classList.remove('shaking'); boxWrap.classList.add('gone');
+    const rect = boxWrap.getBoundingClientRect();
+    confettiBurst(rect.left+rect.width/2, rect.top+rect.height/2, 40);
+    setTimeout(() => {
+      document.getElementById('revealTitle').textContent = `Surprise, ${GIFT_NAME}!`;
+      showScreen('reveal'); chime();
+    }, 350);
+  }, 900);
+});
+document.getElementById('unicornReveal').addEventListener('click', goToHub);
+function goToHub(){
+  document.getElementById('hubTitle').textContent = `Have Fun, ${GIFT_NAME}!`;
+  showScreen('hub');
+}
+document.getElementById('unicornHub').addEventListener('click', (e) => {
+  const img = e.target;
+  img.classList.remove('happy'); void img.offsetWidth; img.classList.add('happy');
+  chime();
+  const rect = img.getBoundingClientRect();
+  confettiBurst(rect.left+rect.width/2, rect.top+rect.height/2, 14);
+});
+
+/* Hub navigation */
+document.querySelectorAll('.game-card').forEach(card => {
+  card.addEventListener('click', () => {
+    if (card.dataset.game) startGame(card.dataset.game);
+    else if (card.dataset.target === 'pet') openPetScreen();
+    else if (card.dataset.target === 'fly') openFlyScreen();
+  });
+});
+document.getElementById('backBtn').addEventListener('click', () => showScreen('hub'));
+document.getElementById('backBtnPet').addEventListener('click', () => showScreen('hub'));
+document.getElementById('backBtnFly').addEventListener('click', () => showScreen('hub'));
+
+/* ---------------- Pet screen ---------------- */
+let happiness = 40;
+let milestonesHit = new Set();
+function openPetScreen(){
+  updateHappyBar();
+  showScreen('pet');
+}
+function updateHappyBar(){
+  document.getElementById('happyFill').style.width = happiness + '%';
+  const acc = document.getElementById('accessorySlot');
+  acc.textContent = happiness >= 100 ? '👑' : (happiness >= 50 ? '🎀' : '');
+}
+function bumpHappiness(amount, label){
+  const before = happiness;
+  happiness = Math.min(100, happiness + amount);
+  updateHappyBar();
+  const img = document.getElementById('unicornPet');
+  img.classList.remove('happy'); void img.offsetWidth; img.classList.add('happy');
+  chime();
+  document.getElementById('petFeedback').textContent = label;
+  [25,50,75,100].forEach(m => {
+    if (before < m && happiness >= m && !milestonesHit.has(m)){
+      milestonesHit.add(m);
+      addStar(1);
+      document.getElementById('petFeedback').textContent = label + `  •  Milestone! +1 star`;
+    }
+  });
+}
+function floatEmojiOverPet(emoji){
+  const stage = document.getElementById('petStage');
+  const el = document.createElement('div');
+  el.className='float-emoji'; el.textContent = emoji;
+  el.style.left = (40+Math.random()*140)+'px';
+  el.style.top = (60+Math.random()*60)+'px';
+  stage.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+document.getElementById('feedBtn').addEventListener('click', () => {
+  floatEmojiOverPet('🍓'); bumpHappiness(15, `${GIFT_NAME}'s unicorn munches happily!`);
+});
+document.getElementById('petBtn').addEventListener('click', () => {
+  floatEmojiOverPet('💖'); bumpHappiness(10, `Your unicorn nuzzles you!`);
+});
+document.getElementById('playBtn').addEventListener('click', () => {
+  floatEmojiOverPet('🎉'); bumpHappiness(12, `Your unicorn prances with joy!`);
+  const rect = document.getElementById('petStage').getBoundingClientRect();
+  confettiBurst(rect.left+rect.width/2, rect.top+rect.height/2, 16);
+});
+
+/* ---------------- Quiz games (harder, more variety) ---------------- */
+const gameTitles = { counting:'🍓 Counting Meadow', letters:'🔤 Rainbow Letters', colors:'🎨 Color Magic', math:'➕ Math Sparkle' };
+let lastPromptSignature = '';
+
+function startGame(type){
+  document.getElementById('gameTitle').textContent = gameTitles[type];
+  showScreen('game');
+  nextQuestion(type);
+}
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+function renderOptions(options, correctAnswer, onPick){
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML=''; document.getElementById('feedback').textContent='';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className='opt-btn'; btn.textContent=opt;
+    btn.addEventListener('click', () => {
+      grid.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+      if (String(opt) === String(correctAnswer)){
+        btn.classList.add('correct'); chime(); addStar(1);
+        const rect = btn.getBoundingClientRect();
+        confettiBurst(rect.left+rect.width/2, rect.top+rect.height/2, 18);
+        document.getElementById('feedback').textContent = pickPraise();
+        setTimeout(()=>onPick(true), 900);
+      } else {
+        btn.classList.add('wrong'); buzz();
+        document.getElementById('feedback').textContent = `Almost! The answer was ${correctAnswer} 💜`;
+        grid.querySelectorAll('.opt-btn').forEach(b=>{ if(String(b.textContent)===String(correctAnswer)) b.classList.add('correct'); });
+        setTimeout(()=>onPick(false), 1300);
+      }
+    });
+    grid.appendChild(btn);
+  });
+}
+function pickPraise(){
+  const p=['Yay! You got it! ⭐','Amazing job! 🦄','So smart! ✨','Perfect! 🌈','Woohoo! 💖'];
+  return p[Math.floor(Math.random()*p.length)];
+}
+function nextQuestion(type){
+  if (type==='counting') return questionCounting();
+  if (type==='letters') return questionLetters();
+  if (type==='colors') return questionColors();
+  if (type==='math') return questionMath();
+}
+
+/* Counting: up to 20, sometimes two groups to add */
+function questionCounting(){
+  const icon = ['🍓','🌸','⭐','🦋','🍄','🌈'][Math.floor(Math.random()*6)];
+  const twoGroups = Math.random() < 0.5;
+  let n, promptHTML;
+  if (twoGroups){
+    const a = 2+Math.floor(Math.random()*9), b = 2+Math.floor(Math.random()*9);
+    n = a+b;
+    promptHTML = `<div style="width:100%;"><div>Count both groups. How many ${icon} in total?</div>
+      <div class="count-objects">${icon.repeat(a)} &nbsp; ${icon.repeat(b)}</div></div>`;
+  } else {
+    n = 5+Math.floor(Math.random()*15);
+    promptHTML = `<div style="width:100%;"><div>How many ${icon} do you see?</div>
+      <div class="count-objects">${icon.repeat(n)}</div></div>`;
+  }
+  document.getElementById('promptArea').innerHTML = promptHTML;
+  let options=new Set([n]);
+  while(options.size<4){ const d=n+(Math.floor(Math.random()*7)-3); if(d>0 && d<=24) options.add(d); }
+  renderOptions(shuffle([...options]), n, () => nextQuestion('counting'));
+}
+
+/* Letters: next/before letter, missing letter in a word, vowel spotting */
+const wordBank = ['CAT','DOG','SUN','HAT','PEN','CUP','BUS','RUN','BAG','MAP','BED','FOX','JAM','LEG','PIG','RED','TEN','WEB','ZIP','FISH','FROG','STAR','MOON','BOOK','TREE','CAKE','LAMP','DUCK'];
+function questionLetters(){
+  const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const modes=['next','before','missing','vowel'];
+  const mode = modes[Math.floor(Math.random()*modes.length)];
+  if (mode==='next'){
+    const idx=Math.floor(Math.random()*(alphabet.length-1));
+    const letter=alphabet[idx], answer=alphabet[idx+1];
+    document.getElementById('promptArea').textContent = `What letter comes right after "${letter}"?`;
+    let options=new Set([answer]);
+    while(options.size<4) options.add(alphabet[Math.floor(Math.random()*alphabet.length)]);
+    renderOptions(shuffle([...options]), answer, () => nextQuestion('letters'));
+  } else if (mode==='before'){
+    const idx=1+Math.floor(Math.random()*(alphabet.length-1));
+    const letter=alphabet[idx], answer=alphabet[idx-1];
+    document.getElementById('promptArea').textContent = `What letter comes right before "${letter}"?`;
+    let options=new Set([answer]);
+    while(options.size<4) options.add(alphabet[Math.floor(Math.random()*alphabet.length)]);
+    renderOptions(shuffle([...options]), answer, () => nextQuestion('letters'));
+  } else if (mode==='missing'){
+    const word = wordBank[Math.floor(Math.random()*wordBank.length)];
+    const pos = Math.floor(Math.random()*word.length);
+    const answer = word[pos];
+    const display = word.split('').map((ch,i)=> i===pos ? '_' : ch).join(' ');
+    document.getElementById('promptArea').innerHTML = `<div>Which letter is missing?<br><span style="font-size:26px;letter-spacing:4px;">${display}</span></div>`;
+    let options=new Set([answer]);
+    while(options.size<4) options.add(alphabet[Math.floor(Math.random()*alphabet.length)]);
+    renderOptions(shuffle([...options]), answer, () => nextQuestion('letters'));
+  } else {
+    const vowels=['A','E','I','O','U'];
+    const answer = vowels[Math.floor(Math.random()*vowels.length)];
+    let options=new Set([answer]);
+    while(options.size<4){
+      const c = alphabet[Math.floor(Math.random()*alphabet.length)];
+      if (!vowels.includes(c)) options.add(c);
+    }
+    document.getElementById('promptArea').textContent = `Which one of these is a VOWEL?`;
+    renderOptions(shuffle([...options]), answer, () => nextQuestion('letters'));
+  }
+}
+
+/* Colors: naming + simple color mixing */
+function questionColors(){
+  const palette=[{name:'Pink',hex:'#FF6FA5'},{name:'Sky Blue',hex:'#7FD8F7'},{name:'Sunny Yellow',hex:'#FFD65C'},{name:'Mint Green',hex:'#7CE0B0'},{name:'Purple',hex:'#B98FC9'},{name:'Orange',hex:'#FFA25C'}];
+  const mixes=[{q:'Red + Yellow',a:'Orange'},{q:'Blue + Yellow',a:'Green'},{q:'Red + Blue',a:'Purple'},{q:'Red + White',a:'Pink'}];
+  const mode = Math.random() < 0.5 ? 'name' : 'mix';
+  if (mode==='name'){
+    const correct = palette[Math.floor(Math.random()*palette.length)];
+    document.getElementById('promptArea').innerHTML = `<div>What color is this?<br><div style="width:64px;height:64px;border-radius:50%;background:${correct.hex};margin:10px auto;border:4px solid white;box-shadow:0 4px 10px rgba(0,0,0,.15);"></div></div>`;
+    let options=new Set([correct.name]);
+    while(options.size<4) options.add(palette[Math.floor(Math.random()*palette.length)].name);
+    renderOptions(shuffle([...options]), correct.name, () => nextQuestion('colors'));
+  } else {
+    const m = mixes[Math.floor(Math.random()*mixes.length)];
+    document.getElementById('promptArea').textContent = `Magic mixing: ${m.q} = ?`;
+    const allAnswers = ['Orange','Green','Purple','Pink','Brown'];
+    let options=new Set([m.a]);
+    while(options.size<4) options.add(allAnswers[Math.floor(Math.random()*allAnswers.length)]);
+    renderOptions(shuffle([...options]), m.a, () => nextQuestion('colors'));
+  }
+}
+
+/* Math: addition, subtraction, times table of 2/5 */
+function questionMath(){
+  const modes=['add','add','subtract','subtract','times'];
+  const mode = modes[Math.floor(Math.random()*modes.length)];
+  let a,b,answer,text;
+  if (mode==='add'){
+    a=2+Math.floor(Math.random()*17); b=1+Math.floor(Math.random()*(20-a>1?20-a:1));
+    answer=a+b; text=`${a} + ${b} = ?`;
+  } else if (mode==='subtract'){
+    a=5+Math.floor(Math.random()*16); b=1+Math.floor(Math.random()*a);
+    answer=a-b; text=`${a} - ${b} = ?`;
+  } else {
+    const table=[2,5][Math.floor(Math.random()*2)];
+    b=1+Math.floor(Math.random()*10);
+    answer=table*b; text=`${table} x ${b} = ?`;
+  }
+  document.getElementById('promptArea').textContent = text;
+  let options=new Set([answer]);
+  while(options.size<4){ const d=answer+(Math.floor(Math.random()*9)-4); if(d>=0) options.add(d); }
+  renderOptions(shuffle([...options]), answer, () => nextQuestion('math'));
+}
+
+/* ---------------- Fly to the Sky game ---------------- */
+const flyCanvas = document.getElementById('flyCanvas');
+const fctx = flyCanvas.getContext('2d');
+const flyImg = new Image();
+flyImg.onerror = () => { flyImg.onerror = null; flyImg.src = UNICORN_FALLBACK; };
+flyImg.src = UNICORN_IMG;
+
+let flyState = null;
+let flyRAF = null;
+let flyBest = 0;
+
+function openFlyScreen(){
+  showScreen('fly');
+  resetFlyOverlay();
+}
+function showFlyOverlay(html){
+  const overlay = document.getElementById('flyOverlay');
+  overlay.innerHTML = html;
+  overlay.style.display = 'flex';
+  flyCanvas.style.display = 'none';
+}
+function showFlyCanvas(){
+  document.getElementById('flyOverlay').style.display = 'none';
+  flyCanvas.style.display = 'block';
+}
+function resetFlyOverlay(){
+  showFlyOverlay(`<h3>Ready to fly?</h3><p>Tap, click, or press Space to flap. Fly through the gaps in the rainbow clouds!</p><button class="fly-btn" id="flyStartBtn">Start Flying</button>`);
+  document.getElementById('flyStartBtn').addEventListener('click', startFlyGame);
+  document.getElementById('flyScoreLabel').textContent = 'Score: 0' + (flyBest ? ('   Best: '+flyBest) : '');
+}
+
+function startFlyGame(){
+  if (flyRAF) { cancelAnimationFrame(flyRAF); flyRAF = null; }
+  showFlyCanvas();
+  flyState = {
+    y: flyCanvas.height/2, vy: 0, gravity: 0.42, flap: -7.2,
+    x: 70, pipes: [], frame: 0, score: 0, gap: 140, speed: 2.6, alive: true
+  };
+  spawnPipe();
+  flyLoop();
+}
+function spawnPipe(){
+  const margin = 36;
+  const gapY = margin + Math.random()*(flyCanvas.height - margin*2 - flyState.gap);
+  flyState.pipes.push({ x: flyCanvas.width + 10, gapY, passed:false });
+}
+function flapNow(){
+  if (!flyState || !flyState.alive) return;
+  flyState.vy = flyState.flap;
+  pop();
+}
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && screens.fly && !screens.fly.classList.contains('hidden')) { e.preventDefault(); flapNow(); }
+});
+flyCanvas.addEventListener('mousedown', flapNow);
+flyCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); flapNow(); }, {passive:false});
+
+function flyLoop(){
+  if (!flyState || !flyState.alive) return;
+  flyState.frame++;
+  flyState.vy += flyState.gravity;
+  flyState.y += flyState.vy;
+
+  if (flyState.frame % 95 === 0) spawnPipe();
+
+  const pipeWidth = 42;
+  fctx.clearRect(0,0,flyCanvas.width,flyCanvas.height);
+  fctx.fillStyle = '#BFE8FB';
+  fctx.fillRect(0,0,flyCanvas.width,flyCanvas.height);
+
+  let collided = false;
+  flyState.pipes.forEach(p => {
+    p.x -= flyState.speed;
+    const grad = fctx.createLinearGradient(p.x,0,p.x+pipeWidth,0);
+    grad.addColorStop(0,'#FFD1E8'); grad.addColorStop(1,'#C6519E');
+    fctx.fillStyle = grad;
+    fctx.fillRect(p.x, 0, pipeWidth, p.gapY);
+    fctx.fillRect(p.x, p.gapY + flyState.gap, pipeWidth, flyCanvas.height - (p.gapY+flyState.gap));
+    fctx.fillStyle = 'rgba(255,255,255,0.5)';
+    fctx.fillRect(p.x, p.gapY-14, pipeWidth, 14);
+    fctx.fillRect(p.x, p.gapY+flyState.gap, pipeWidth, 14);
+
+    if (!p.passed && p.x + pipeWidth < flyState.x){
+      p.passed = true; flyState.score++;
+    }
+    const hitboxSize = 38;
+    const ux1 = flyState.x - hitboxSize/2, ux2 = flyState.x + hitboxSize/2;
+    const uy1 = flyState.y - hitboxSize/2, uy2 = flyState.y + hitboxSize/2;
+    const hitsX = ux2 > p.x && ux1 < p.x + pipeWidth;
+    const hitsY = uy1 < p.gapY || uy2 > p.gapY + flyState.gap;
+    if (hitsX && hitsY) collided = true;
+  });
+  flyState.pipes = flyState.pipes.filter(p => p.x > -pipeWidth-5);
+
+  const unicornSize = 54;
+  fctx.save();
+  const tilt = Math.max(-0.4, Math.min(0.6, flyState.vy/12));
+  fctx.translate(flyState.x, flyState.y);
+  fctx.rotate(tilt);
+  if (flyImg.complete) fctx.drawImage(flyImg, -unicornSize/2, -unicornSize/2, unicornSize, unicornSize);
+  fctx.restore();
+
+  document.getElementById('flyScoreLabel').textContent = 'Score: ' + flyState.score + (flyBest ? ('   Best: '+flyBest) : '');
+
+  if (flyState.y - unicornSize/2 < 0 || flyState.y + unicornSize/2 > flyCanvas.height || collided){
+    flyState.alive = false;
+    endFlyGame();
+    return;
+  }
+  flyRAF = requestAnimationFrame(flyLoop);
+}
+function endFlyGame(){
+  buzz();
+  const earned = Math.min(10, Math.floor(flyState.score/3));
+  if (earned > 0) addStar(earned);
+  if (flyState.score > flyBest) flyBest = flyState.score;
+  showFlyOverlay(`<h3>Nice flying, ${GIFT_NAME}!</h3>
+    <p>You scored <b>${flyState.score}</b>! ${earned>0 ? ('You earned '+earned+' star'+(earned>1?'s':'')+' ⭐') : 'Fly further to earn stars!'}</p>
+    <button class="fly-btn" id="flyAgainBtn">Play Again</button>`);
+  document.getElementById('flyAgainBtn').addEventListener('click', startFlyGame);
+}
+function stopFlyGame(){
+  if (flyRAF) cancelAnimationFrame(flyRAF);
+  if (flyState) flyState.alive = false;
+}
+</script>
+
+</body>
+</html>
